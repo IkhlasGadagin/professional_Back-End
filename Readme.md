@@ -21,3 +21,4 @@ And before saving bcrypt and save the password also we can validate the password
 
 In the Video model aggegration pipeline is used to manage the mongooseAggregatePaginate 
 
+create cloudenary account to use it followed by the multer 
