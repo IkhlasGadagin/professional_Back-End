@@ -16,3 +16,8 @@ express will convert all the data into jsonformat expect files   ..(multer does)
 
 use of utils folder to achieve standard like asyncHandler highorder funvtion Promise
 
+the 2 models is created in the model folder that has  mongoose hooks for generate access, refresh and also isPasswordCorrect and hooks pre 
+And before saving bcrypt and save the password also we can validate the password 
+
+In the Video model aggegration pipeline is used to manage the mongooseAggregatePaginate 
+
