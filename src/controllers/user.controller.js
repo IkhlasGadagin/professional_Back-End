@@ -38,7 +38,12 @@ const registerUser = asyscHandler(async (req, res) => {
 
     //the image is gone inside the multer take it by files ref path is the original path
     //  of image that went inside the public folder inside temp 
-    const avatarLocalPath = req.files?.avatar[0].path;
+    let avatarLocalPath;
+    if (req.files && Array.isArray(req.files.avatar) && req.files.avatar.length > 0) {
+        avatarLocalPath = req.files.avatar[0].path;
+
+    }
+    // const avatarLocalPath = req?.files?.avatar[0]?.path;
     // const coverImageLocalPath = req.files?.coverImage[0]?.path;    //this is optional giver undefined if not uploaded
 
     let coverImageLocalPath;
