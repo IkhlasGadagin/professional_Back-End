@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-const generateAccessTokenAndRefreshToken = (userId) => {
+const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
         const user = await User.findById(userId);
         if (!user) {
@@ -158,10 +158,28 @@ const loginUser = asyscHandler(async (req, res) => {
 })
 
 const loggedOut = asyscHandler(async (req, res) => {
+    // the user is came from the mideleware verifyJWT via db
+    // User.findByIdAndUpdate(req.user._id, { refreshToken: "" });
+    User.findByIdAndUpdate(req.user._id, {
+        $set: {
+            refreshToken: ""
+
+        }
+    });
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "User Logged out Successfully"));
+    // req.user._id
     //clear the cookie and also need to remove the refresh token from db only ny knowing user's id*
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
-    return res.status(200).json(new ApiResponse(200, "User Logged out Successfully"));
+
 })
 
-export { registerUser, loginUser };
+export { registerUser, loginUser, loggedOut };
