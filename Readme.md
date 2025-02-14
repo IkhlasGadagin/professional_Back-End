@@ -24,3 +24,9 @@ In the Video model aggegration pipeline is used to manage the mongooseAggregateP
 create cloudenary account to use it followed by the multer 
 
 started to build the controller via through app.js 
+
+registration is done in the user.controller.js apart from refresToken and watchHistry []
+
+use of POSTMAN send data for testing formdata  used to send files too
+
+handled all the data for the all the inputs also for empty image too in register includes coverImage 

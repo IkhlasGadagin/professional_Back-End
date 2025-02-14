@@ -32,10 +32,10 @@ const userSchema = new mongoose.Schema(
         coverImage: {
             type: String,  //cloudinary url is stored multer middleware public and create but optional
         },
-        watchHistory: {
+        watchHistory: [{
             type: Schema.Types.ObjectId,
             ref: "Video"
-        },
+        }],
         password: {
             type: String,
             required: [true, 'Password is required'],
