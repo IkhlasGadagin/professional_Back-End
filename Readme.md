@@ -30,3 +30,5 @@ registration is done in the user.controller.js apart from refresToken and watchH
 use of POSTMAN send data for testing formdata  used to send files too
 
 handled all the data for the all the inputs also for empty image too in register includes coverImage 
+
+after Register user login with same credentails valid and generate tokens verify and send as cookie too

@@ -3,6 +3,26 @@ import { asyscHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+
+const generateAccessTokenAndRefreshToken = (userId) => {
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            throw new ApiError(404, "User not found");
+        }
+
+        const accessToken = await user.generateAccessToken();
+        const refreshToken = await user.generateRefreshToken();
+        //here in the user ref refresh token is "" please generated insert to it and save in db without altering Schema*
+        user.refreshToken = refreshToken;
+
+        await user.save({ validateBeforeSave: false });
+        return { accessToken, refreshToken };
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating access token and refresh token");
+    }
+}
+
 const registerUser = asyscHandler(async (req, res) => {
     /* 
           1️⃣ Receive the frontend data
@@ -82,4 +102,66 @@ const registerUser = asyscHandler(async (req, res) => {
         new ApiResponse(201, "User Created Successfully", createdUser)
     );
 })
-export { registerUser };
+//LOGIN
+const loginUser = asyscHandler(async (req, res) => {
+    /* 
+    take all the data from frontend
+    if data is not there throw error
+    check if user is there in db or not IF NOT there throw error
+    check if password is correct or not if not throw error
+    generate access and refresh Token
+    //send cookie with refresh token
+    */
+    const { username, email, password } = req.body;
+    if (!username && !email && !password) {
+        throw new ApiError(400, "Username/Email and Password is required");
+    }
+
+    const user = await User.findOne({ $or: [{ username }, { email }] });
+
+    if (!user) {
+        throw new ApiError(404, "User does not exist");
+    }
+
+    const isPasswordCorrect = await user.isPasswordCorrect(password);
+
+    if (!isPasswordCorrect) {
+        throw new ApiError(401, "Password is incorrect");
+
+    }
+    const { accessToken, refreshToken } = generateAccessTokenAndRefreshToken(user._id);
+    // calling again because we want refresh token from db which is not present in user object So*
+    const loggeduserData = await User.findById(user._id).select("-password -refreshToken");
+
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(new ApiResponse(200,
+            {
+                user: loggeduserData, accessToken, refreshToken
+            },
+            "User Logged in Successfully"))
+        ;
+    // res.cookie("refreshToken", accessToken.refreshToken, {
+    //     httpOnly: true,
+    //     sameSite: "none",
+    //     secure: true
+    // })
+    // return res.status(200).json(
+    //     new ApiResponse(200, "User Logged in Successfully", userData)
+    // )
+})
+
+const loggedOut = asyscHandler(async (req, res) => {
+    //clear the cookie and also need to remove the refresh token from db only ny knowing user's id*
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+    return res.status(200).json(new ApiResponse(200, "User Logged out Successfully"));
+})
+
+export { registerUser, loginUser };
