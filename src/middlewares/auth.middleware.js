@@ -1,7 +1,8 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model.js';
-const verifyJWT = asyncHandler(async (req, _, next) => {
+import { ApiError } from "../utils/ApiError.js";
+import { asyscHandler } from "../utils/asyncHandler.js";
+const verifyJWT = asyscHandler(async (req, _, next) => {
     /* 
     take the token from header or cookie
     verify the token by decode it
