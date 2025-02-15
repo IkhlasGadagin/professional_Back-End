@@ -6,20 +6,26 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
-        const user = await User.findById(userId);
-        if (!user) {
-            throw new ApiError(404, "User not found");
-        }
+        // console.log(userId, "userId");
+        // console.log(User, "User mongoose");
 
-        const accessToken = await user.generateAccessToken();
-        const refreshToken = await user.generateRefreshToken();
+        const user = await User.findById(userId);
+        // console.log(user, "user");
+
+
+        const generatedaccessToken = user.generateAccessToken();
+        const generatedrefreshToken = user.generateRefreshToken();
+
+        //console.log("Type of generateAccessToken:", typeof user.generateAccessToken); double check for undefined
+        //      // console.log(generatedrefreshToken, "generatedrefreshToken");
+
         //here in the user ref refresh token is "" please generated insert to it and save in db without altering Schema*
-        user.refreshToken = refreshToken;
+        user.refreshToken = generatedrefreshToken;
 
         await user.save({ validateBeforeSave: false });
-        return { accessToken, refreshToken };
+        return { generatedaccessToken, generatedrefreshToken };
     } catch (error) {
-        throw new ApiError(500, "Something went wrong while generating access token and refresh token");
+        throw new ApiError(500, error, "Something went wrong while generating access token and refresh token");
     }
 }
 
@@ -129,7 +135,7 @@ const loginUser = asyscHandler(async (req, res) => {
         throw new ApiError(401, "Password is incorrect");
 
     }
-    const { accessToken, refreshToken } = generateAccessTokenAndRefreshToken(user._id);
+    const { generatedaccessToken, generatedrefreshToken } = await generateAccessTokenAndRefreshToken(user._id);
     // calling again because we want refresh token from db which is not present in user object So*
     const loggeduserData = await User.findById(user._id).select("-password -refreshToken");
 
@@ -139,11 +145,11 @@ const loginUser = asyscHandler(async (req, res) => {
     }
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", generatedaccessToken, options)
+        .cookie("refreshToken", generatedrefreshToken, options)
         .json(new ApiResponse(200,
             {
-                user: loggeduserData, accessToken, refreshToken
+                user: loggeduserData, generatedaccessToken, generatedrefreshToken
             },
             "User Logged in Successfully"))
         ;
