@@ -334,4 +334,39 @@ const updateUserAvatar = asyscHandler(async (req, res) => {
     );
 })
 
-export { registerUser, loginUser, loggedOut, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateUserProfile };
+const updateUserCoverImage = asyscHandler(async (req, res) => {
+    /* 
+    take the avatar from frontend
+    validate
+    use multer middleware to get the path of the image
+    confirm image came or not validate
+    if yes upload to cloudinary
+    take the url 
+    and update the user with the new avatar
+    by findByIdAndUpdate($set: {avatar: url})
+    */
+    const coverImageLocalPath = req?.file?.path;
+
+    if (!coverImageLocalPath) {
+        throw new ApiError(400, "coverImage file is required to update coverImage");
+    }
+
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+    if (!coverImage.url) {
+        throw new ApiError(500, "Failed to upload coverImage image to cloudinary");
+    }
+
+    const user = await User.findByIdAndUpdate(req.user?._id, {
+        $set: {
+            coverImage: coverImage.url
+        }
+    }, { new: true })
+        .select("-password -refreshToken");
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User coverImage Updated Successfully")
+    );
+})
+
+export { registerUser, loginUser, loggedOut, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateUserProfile, updateUserAvatar, updateUserCoverImage };
