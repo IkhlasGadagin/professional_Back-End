@@ -234,15 +234,32 @@ const refreshAccessToken = asyscHandler(async (req, res) => {
 })
 
 const changeCurrentPassword = asyscHandler(async (req, res) => {
+    /* 
+    take both the password from frontend
+    validate
+    withthe help of middleware get user's _id get the user by User
+    check if current password is correct or not if not throw error
+    set the new password to user.password and save it
+    send response
+    */
     const { currentPassword, newPassword } = req.body;
-    if (!currentPassword && !newPassword) {
-        throw new ApiError(400, "Current Password and New Password is required");
+
+    if (!currentPassword || !newPassword) {
+        throw new ApiError(400, "Current Password and New Password are required");
     }
 
     const user = await User.findById(req.user._id);
-    const isPasswordCorrect = await user.isPasswordCorrect(currentPassword);
+    const isPasswordRight = await user.isPasswordCorrect(currentPassword);
 
+    if (!isPasswordRight) {
+        throw new ApiError(401, "Current Password is incorrect");
+    }
 
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200)
+        .json(new ApiResponse(200, {}, "Password Changed Successfully"));
 })
 
-export { registerUser, loginUser, loggedOut, refreshAccessToken };
+export { registerUser, loginUser, loggedOut, refreshAccessToken, changeCurrentPassword };
