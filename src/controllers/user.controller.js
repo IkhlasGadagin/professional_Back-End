@@ -262,4 +262,76 @@ const changeCurrentPassword = asyscHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Password Changed Successfully"));
 })
 
-export { registerUser, loginUser, loggedOut, refreshAccessToken, changeCurrentPassword };
+const getCurrentUser = asyscHandler(async (req, res) => {
+    /* 
+    use middleware and send the user thats it
+    */
+    return res
+        .status(200)
+        .json(new ApiResponse(200, req.user, "User Data Fetched Successfully"));
+})
+
+const updateUserProfile = asyscHandler(async (req, res) => {
+    /* 
+    take all the data from frontend
+    validate
+    get the user by _id
+    update the user with the new data
+    with _id, $set and  new:true
+    */
+    const { fullName, email } = req.body;
+    if (!fullName || !email) {
+        throw new ApiError(400, "Full Name and Email are required");
+    }
+    //user comes from middleware which holds current user all data from db through decode token  (verifyJWT)
+    const user = await User.findByIdAndUpdate(req.user._id,
+        {
+            $set: {
+                fullName,
+                email
+            }
+        },
+
+        { new: true }).select("-password -refreshToken");
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "User Profile with name and email only Updated Successfully"));
+})
+
+const updateUserAvatar = asyscHandler(async (req, res) => {
+    /* 
+    take the avatar from frontend
+    validate
+    use multer middleware to get the path of the image
+    confirm image came or not validate
+    if yes upload to cloudinary
+    take the url 
+    and update the user with the new avatar
+    by findByIdAndUpdate($set: {avatar: url})
+    */
+    const avatarLocalPath = req?.file?.path;
+
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is required to update avatar");
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if (!avatar.url) {
+        throw new ApiError(500, "Failed to upload avatar image to cloudinary");
+    }
+
+    const user = await User.findByIdAndUpdate(req.user?._id, {
+        $set: {
+            avatar: avatar.url
+        }
+    }, { new: true })
+        .select("-password -refreshToken");
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User Avatar Updated Successfully")
+    );
+})
+
+export { registerUser, loginUser, loggedOut, refreshAccessToken, changeCurrentPassword, getCurrentUser, updateUserProfile };

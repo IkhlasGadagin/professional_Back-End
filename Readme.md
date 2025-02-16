@@ -32,3 +32,15 @@ use of POSTMAN send data for testing formdata  used to send files too
 handled all the data for the all the inputs also for empty image too in register includes coverImage 
 
 after Register user login with same credentails valid and generate tokens verify and send as cookie too
+
+Registration, Login, Logout(with middleware user next()) refreshtoken acces when expried, change password, getCurentuser by middleware,  update All the credentials with middleware and with findByIdAndUpdate(req.user._id,
+        {
+            $set: {
+                fullName,
+                email
+            }
+        },
+
+        { new: true }).select("-password -refreshToken")
+
+FOR IMAGE UPDATE PLEASE KEEP SEPERATE API FOR ONLY FOR THE IMAGE VIA THROUGH CLOUDENERY SO
