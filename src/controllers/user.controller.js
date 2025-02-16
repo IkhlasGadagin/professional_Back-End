@@ -232,4 +232,17 @@ const refreshAccessToken = asyscHandler(async (req, res) => {
     }
 
 })
+
+const changeCurrentPassword = asyscHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword && !newPassword) {
+        throw new ApiError(400, "Current Password and New Password is required");
+    }
+
+    const user = await User.findById(req.user._id);
+    const isPasswordCorrect = await user.isPasswordCorrect(currentPassword);
+
+
+})
+
 export { registerUser, loginUser, loggedOut, refreshAccessToken };
