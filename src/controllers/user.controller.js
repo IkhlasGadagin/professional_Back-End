@@ -228,7 +228,7 @@ const refreshAccessToken = asyscHandler(async (req, res) => {
             ;
     } catch (error) {
         console.log(error, "error in generating new access token and refresh token");
-
+        throw new ApiError(401, error?.message || "Invalid Refresh Token");
     }
 
 })
