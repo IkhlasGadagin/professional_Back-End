@@ -44,3 +44,9 @@ Registration, Login, Logout(with middleware user next()) refreshtoken acces when
         { new: true }).select("-password -refreshToken")
 
 FOR IMAGE UPDATE PLEASE KEEP SEPERATE API FOR ONLY FOR THE IMAGE VIA THROUGH CLOUDENERY SO
+
+User Aggegration pipeline is done in the controller of user 
+tke user name make match with username
+lookup from localField foreign \Filed as
+$addFields to add the extra field 
+ $project tell what to send fields that is need to be send for frontend 
