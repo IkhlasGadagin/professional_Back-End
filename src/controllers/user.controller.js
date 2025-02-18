@@ -170,7 +170,7 @@ const loggedOut = asyscHandler(async (req, res) => {
     // User.findByIdAndUpdate(req.user._id, { refreshToken: "" });
     await User.findByIdAndUpdate(req.user._id, {
         $unset: {
-            refreshToken: 1 // this removes the field from document
+            refreshToken: 1 // this removes the field from document better that undefined or null
         }
     },
         {
@@ -347,6 +347,7 @@ const updateUserCoverImage = asyscHandler(async (req, res) => {
     by findByIdAndUpdate($set: {avatar: url})
     */
     const coverImageLocalPath = req?.file?.path;
+    console.log(coverImageLocalPath);
 
     if (!coverImageLocalPath) {
         throw new ApiError(400, "coverImage file is required to update coverImage");
@@ -377,6 +378,8 @@ const getuserChannelProfile = asyscHandler(async (req, res) => {
     // or you can take user deom the middleware and take username from it
 
     const username = req.params.username;
+    console.log(username, "inparams name");
+
 
     if (!username?.trim()) {
         throw new ApiError(400, "Username is required");
@@ -401,7 +404,7 @@ const getuserChannelProfile = asyscHandler(async (req, res) => {
                 from: "subscriptions",
                 localField: "_id",
                 foreignField: "subscriber",
-                as: "channels"
+                as: "subscribedTo"
             }
         },
         {
